@@ -42,6 +42,13 @@
  z-index:12;display:block;transition:background .15s ease,filter .15s ease,opacity .15s ease}
 #removePiece:disabled{cursor:default;color:#e2d7c7;background:linear-gradient(#8d8071,#766a5e 54%,#62564b);border-color:#8d8274;text-shadow:0 2px 2px #32271b;box-shadow:inset 0 4px 3px #ffffff2e,inset 0 -5px 3px #0003,0 4px 7px #0007;opacity:.78}
 #removePiece:not(:disabled):active{filter:brightness(1.15)}
+
+/* A brief jewel-like gleam on the four squares just snapped into place. */
+.piececell.snap-glint{animation:snap-settle .52s ease-out both}
+.piececell.snap-glint::after{content:"";position:absolute;inset:-3px;border-radius:8px;pointer-events:none;animation:snap-sheen .65s ease-out both;background:linear-gradient(115deg,transparent 12%,#fff0 35%,#fff9 47%,#fff0 58%,transparent 84%);background-size:230% 100%;}
+@keyframes snap-settle{0%{filter:brightness(1.6);box-shadow:inset 0 9px 0 #fff9,inset 0 -10px 0 #0002,0 0 0 3px #fff4,0 0 22px 8px #ffe68a}65%{filter:brightness(1.15)}100%{filter:brightness(1)}}
+@keyframes snap-sheen{0%{background-position:110% 0;opacity:0}15%{opacity:1}100%{background-position:-110% 0;opacity:0}}
+@media (prefers-reduced-motion: reduce){.piececell.snap-glint,.piececell.snap-glint::after{animation:none}}
 </style></head><body><div id="viewport"><main id="stage" aria-label="テトロミノパズル"><button id="infoHit" aria-label="この教材について"></button><div id="boardFrame"><div id="board" aria-label="5列8行のパズル盤"></div></div><button id="removePiece" aria-label="選んだピースをはずす" disabled>はずす</button><div id="palette" aria-label="ピースを選ぶ"></div><div id="actions"><button class="action" id="rotate">⟳ 回転</button><button class="action" id="flip">⇄ 反転</button><button class="action" id="undo">↶ 1つ戻す</button><button class="action" id="reset">▤ やりなおし</button></div><div id="hint">ピースを選んでタップ、またはドラッグで配置</div><div id="toast" role="status"></div><div id="overlay" class="show"><div id="dialog" class="modal"></div></div></main></div><script>
 (()=>{'use strict';
 const W=5,H=8,SHAPES={I:[[0,0],[0,1],[0,2],[0,3]],O:[[0,0],[1,0],[0,1],[1,1]],T:[[0,0],[1,0],[2,0],[1,1]],L:[[0,0],[0,1],[0,2],[1,2]],S:[[1,0],[2,0],[0,1],[1,1]]}, COLORS={I:'#16caf1',O:'#f4d12a',T:'#ab3aeb',L:'#f29128',S:'#28cb64'};
@@ -66,7 +73,15 @@ function snap(type,r,f,targetX,targetY,exclude=null,range=0.72){
  let dist=Math.hypot(x+maxX/2-targetX,y+maxY/2-targetY);
  return dist<=range&&valid(type,r,f,x,y,exclude)?{x,y,dist}:null;
 }
-function commit(type,r,f,x,y,id=null){save();let committedId;if(id===null){committedId=nextId;placed.push({id:nextId++,type,r,f,x,y})}else{let p=placed.find(p=>p.id===id);Object.assign(p,{r,f,x,y});committedId=id}selectedPlaced=id===null?null:committedId;draw();if(occupied().size===40)modal('<div class="wood-kicker">TETROMINO PUZZLE</div><div class="win-stars">✦ ★ ✦</div><h1>クリア！</h1><p>おめでとう！ 40マスかんせい！</p><div class="wood-rule"></div><button class="wood-gold" id="again">もういちど あそぶ</button><button class="wood-green" id="changeMode">レベルをえらぶ</button><button class="wood-muted" id="closeWin">かんせいした盤面を見る</button>','wood win')}
+function commit(type,r,f,x,y,id=null){save();let committedId;if(id===null){committedId=nextId;placed.push({id:nextId++,type,r,f,x,y})}else{let p=placed.find(p=>p.id===id);Object.assign(p,{r,f,x,y});committedId=id}selectedPlaced=id===null?null:committedId;draw();
+// Highlight only the four newly placed squares; never interfere with drag or snap.
+const dims={cw:board.clientWidth/W,ch:board.clientHeight/H};
+const justPlaced=shape(type,r,f).map(([dx,dy])=>[x+dx,y+dy]);
+for(const node of board.querySelectorAll('.placedcell')){
+  const px=Math.round(parseFloat(node.style.left)/dims.cw),py=Math.round(parseFloat(node.style.top)/dims.ch);
+  if(justPlaced.some(([jx,jy])=>jx===px&&jy===py))node.classList.add('snap-glint');
+}
+if(occupied().size===40)modal('<div class="wood-kicker">TETROMINO PUZZLE</div><div class="win-stars">✦ ★ ✦</div><h1>クリア！</h1><p>おめでとう！ 40マスかんせい！</p><div class="wood-rule"></div><button class="wood-gold" id="again">もういちど あそぶ</button><button class="wood-green" id="changeMode">レベルをえらぶ</button><button class="wood-muted" id="closeWin">かんせいした盤面を見る</button>','wood win')}
 function stagePoint(e){let r=stage.getBoundingClientRect();return{x:(e.clientX-r.left)/scale,y:(e.clientY-r.top)/scale}}
 function boardPoint(e){let r=board.getBoundingClientRect();return{x:(e.clientX-r.left)/scale/(board.clientWidth/W),y:(e.clientY-r.top)/scale/(board.clientHeight/H)}}
 function hit(x,y){return [...placed].reverse().find(p=>shape(p.type,p.r,p.f).some(([dx,dy])=>p.x+dx===x&&p.y+dy===y))}
