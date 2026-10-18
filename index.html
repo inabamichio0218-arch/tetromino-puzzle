@@ -16,6 +16,23 @@
 .modal.wood.win .win-stars{font-size:55px;letter-spacing:.2em;color:#ffe57d;text-shadow:0 3px 2px #7a4c14}
 @keyframes woodAppear{from{transform:scale(.82);opacity:.2}to{transform:scale(1);opacity:1}}
 @media(prefers-reduced-motion:reduce){.modal.wood.win h1{animation:none}}
+
+/* Ver.9: 遷移画面の文字を太く大きく、ボタンも押しやすく */
+.modal{font-weight:800}
+.modal h1{font-size:70px;font-weight:1000;letter-spacing:.015em}
+.modal p{font-size:38px;font-weight:850}
+.modal button{font-size:45px;font-weight:1000;line-height:1.25;min-height:112px;text-shadow:0 2px 3px #0006;overflow-wrap:anywhere}
+.modal.menu .menu-mini{font-size:30px;font-weight:1000}
+.modal.menu h1{font-size:73px;font-weight:1000}
+.modal.menu .menu-sub{font-size:36px;font-weight:900}
+.modal.menu .choice-top{font-size:45px;font-weight:1000;line-height:1.2;white-space:normal}
+.modal.menu .choice-sub{font-size:29px;font-weight:850}
+.modal.menu .menu-note{font-size:29px;font-weight:850}
+.modal.wood h1{font-size:75px;font-weight:1000}
+.modal.wood p{font-size:38px;font-weight:950}
+.modal.wood .wood-kicker{font-size:30px;font-weight:1000}
+.modal.wood button{font-size:43px;font-weight:1000;line-height:1.2;min-height:115px;padding:20px 12px;letter-spacing:-.035em;white-space:normal}
+.modal.wood.win h1{font-size:94px}
 </style></head><body><div id="viewport"><main id="stage" aria-label="テトロミノパズル"><button id="infoHit" aria-label="この教材について"></button><div id="boardFrame"><div id="board" aria-label="5列8行のパズル盤"></div></div><div id="palette" aria-label="ピースを選ぶ"></div><div id="actions"><button class="action" id="rotate">⟳ 回転</button><button class="action" id="flip">⇄ 反転</button><button class="action" id="undo">↶ 1つ戻す</button><button class="action" id="reset">▤ やりなおし</button></div><div id="hint">ピースを選んでタップ、またはドラッグで配置</div><div id="toast" role="status"></div><div id="overlay" class="show"><div id="dialog" class="modal"></div></div></main></div><script>
 (()=>{'use strict';
 const W=5,H=8,SHAPES={I:[[0,0],[0,1],[0,2],[0,3]],O:[[0,0],[1,0],[0,1],[1,1]],T:[[0,0],[1,0],[2,0],[1,1]],L:[[0,0],[0,1],[0,2],[1,2]],S:[[1,0],[2,0],[0,1],[1,1]]}, COLORS={I:'#16caf1',O:'#f4d12a',T:'#ab3aeb',L:'#f29128',S:'#28cb64'};
