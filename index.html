@@ -41,6 +41,20 @@
 @keyframes snap-settle{0%{filter:brightness(1.6);box-shadow:inset 0 9px 0 #fff9,inset 0 -10px 0 #0002,0 0 0 3px #fff4,0 0 22px 8px #ffe68a}65%{filter:brightness(1.15)}100%{filter:brightness(1)}}
 @keyframes snap-sheen{0%{background-position:110% 0;opacity:0}15%{opacity:1}100%{background-position:-110% 0;opacity:0}}
 @media (prefers-reduced-motion: reduce){.piececell.snap-glint,.piececell.snap-glint::after{animation:none}}
+
+/* PowerPoint info page: full-height image, one easy return action. */
+.modal.info-page{position:relative;width:1125px;height:2000px;max-height:none;flex:none;
+ padding:0;margin:0;border:0;border-radius:0;overflow:hidden;
+ background:#3f6255 url('info.png') center center/100% 100% no-repeat;
+ box-shadow:none;}
+.modal.info-page #closeInfo{position:absolute;left:225px;bottom:60px;width:675px;
+ height:112px;min-height:0;margin:0;padding:12px 20px;
+ border:5px solid #b8d7cb;border-radius:26px;
+ background:linear-gradient(#48ae92,#147259);color:#fff;
+ font-size:48px;font-weight:1000;line-height:1.2;
+ text-shadow:0 3px 3px #08392a;
+ box-shadow:inset 0 8px 4px #ffffff66,inset 0 -8px 5px #0003,0 8px 15px #132b2799;}
+.modal.info-page #closeInfo:active{filter:brightness(1.12)}
 </style></head><body><div id="viewport"><main id="stage" aria-label="テトロミノパズル"><button id="infoHit" aria-label="この教材について"></button><div id="boardFrame"><div id="board" aria-label="5列8行のパズル盤"></div></div><div id="palette" aria-label="ピースを選ぶ"></div><div id="actions"><button class="action" id="rotate">⟳ 回転</button><button class="action" id="flip">⇄ 反転</button><button class="action" id="removePiece" disabled>はずす</button><button class="action" id="reset">▤ やりなおし</button></div><div id="hint">ピースを選んでタップ、またはドラッグで配置</div><div id="toast" role="status"></div><div id="overlay" class="show"><div id="dialog" class="modal"></div></div></main></div><script>
 (()=>{'use strict';
 const W=5,H=8,SHAPES={I:[[0,0],[0,1],[0,2],[0,3]],O:[[0,0],[1,0],[0,1],[1,1]],T:[[0,0],[1,0],[2,0],[1,1]],L:[[0,0],[0,1],[0,2],[1,2]],S:[[1,0],[2,0],[0,1],[1,1]]}, COLORS={I:'#16caf1',O:'#f4d12a',T:'#ab3aeb',L:'#f29128',S:'#28cb64'};
@@ -121,7 +135,7 @@ board.addEventListener('click',e=>{if(ignoreBoardClick||active||overlay.classLis
 function modify(flip){if(selectedPlaced!==null){let p=placed.find(q=>q.id===selectedPlaced);if(!p){selectedPlaced=null;return}let nr=flip?p.r:(p.r+1)%4,nf=flip?!p.f:p.f;if(valid(p.type,nr,nf,p.x,p.y,p.id)){commit(p.type,nr,nf,p.x,p.y,p.id);msg(flip?'置いたピースを反転':'置いたピースを回転')}else msg('その場所では回転・反転できません');return}let o=orientation[selected];if(flip)o.f=!o.f;else o.r=(o.r+1)%4;drawPalette();msg(flip?selected+'型を左右反転':selected+'型を90°回転')}document.getElementById('rotate').onclick=()=>modify(false);document.getElementById('flip').onclick=()=>modify(true);
 document.getElementById('removePiece').onclick=()=>{let index=placed.findIndex(p=>p.id===selectedPlaced);if(index<0){selectedPlaced=null;syncRemove();msg('はずすピースを選んでね');return}save();placed.splice(index,1);selectedPlaced=null;draw();msg('ピースをはずしました')};
 document.getElementById('reset').onclick=()=>{let chosen=placed.find(p=>p.id===selectedPlaced);modal('<div class="wood-kicker">GAME OPTIONS</div><h1>やりなおし</h1><p>どうしますか？</p><div class="wood-rule"></div>'+ '' +'<button class="wood-red" id="confirmReset">ぜんぶ消して最初から</button><button class="wood-green" id="requestModeChange">レベルをえらびなおす</button><button class="wood-muted" id="cancelReset">キャンセル</button>','wood')};
-document.getElementById('infoHit').onclick=()=>modal('<h1>この教材について</h1><p>PowerPointでデザインした、テトロミノのWebパズルです。</p><p>5つの形を何回でも使えます。ピースを選んでタップ、またはドラッグ。置いたピースをタップすると、回転・反転・移動・はずすができます。</p><button class="alt" id="closeInfo">ゲームにもどる</button><button class="alt" id="openMode">モードをえらぶ</button>');
+document.getElementById('infoHit').onclick=()=>modal('<button id="closeInfo">ゲームにもどる</button>','info-page');
 dialog.addEventListener('click',e=>{let b=e.target.closest('button');if(!b)return;if(b.dataset.mode){mode=b.dataset.mode;placed=[];history=[];nextId=1;selectedPlaced=null;draw();close();msg(mode==='guide'?'おてほんあり':'おてほんなし');return}switch(b.id){case 'deleteSelected':{let index=placed.findIndex(p=>p.id===selectedPlaced);if(index<0){close();msg('ピースを選んでください');break}save();placed.splice(index,1);selectedPlaced=null;draw();close();msg('選んだピースを消しました');break}case 'confirmReset':placed=[];history=[];nextId=1;selectedPlaced=null;draw();close();break;case 'again':placed=[];history=[];nextId=1;selectedPlaced=null;draw();close();break;case 'requestModeChange':modal('<div class="wood-kicker">CONFIRM</div><h1>レベルをかえる？</h1><p>いま置いたピースはすべて消えます。</p><div class="wood-rule"></div><button class="wood-red" id="confirmModeChange">消してレベルをえらぶ</button><button class="wood-muted" id="cancelModeChange">ゲームにもどる</button>','wood');break;case 'confirmModeChange':menu();break;case 'changeMode':case 'openMode':if(placed.length){modal('<div class="wood-kicker">CONFIRM</div><h1>レベルをかえる？</h1><p>いま置いたピースはすべて消えます。</p><div class="wood-rule"></div><button class="wood-red" id="confirmModeChange">消してレベルをえらぶ</button><button class="wood-muted" id="cancelModeChange">ゲームにもどる</button>','wood')}else menu();break;default:close()}});addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('show'))close()});drawPalette();draw();menu();
 })();
 </script></body></html>
